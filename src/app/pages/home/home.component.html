@@ -8,43 +8,36 @@
         placeholder="Type new todo"
         autofocus
         type="text"
+        [(ngModel)]="newTask"
       />
     </div>
   </header>
-  <div class="container todoapp-wrapper">
+  <div *ngIf="tasks.length !== 0" class="container todoapp-wrapper">
     <!-- This section should be hidden by default and shown when there are todos -->
     <section class="main">
       <ul class="todo-list">
-        <li class="completed">
+        <li
+          *ngFor="let task of tasks"
+          [ngClass]="{ completed: task.completed, editing: task.isEditing }"
+        >
           <div class="view">
-            <input class="toggle" type="checkbox" checked />
-            <label>Learn JavaScript</label>
+            <input
+              class="toggle"
+              type="checkbox"
+              [checked]="task.completed"
+              (click)="toggleTaskStatus(task.id)"
+            />
+            <label (dblclick)="openEditMode(task.id)">{{ task.title }}</label>
             <button class="destroy"></button>
           </div>
-          <input class="edit" value="Learn JavaScript" />
-        </li>
-        <li>
-          <div class="view">
-            <input class="toggle" type="checkbox" />
-            <label>Buy a unicorn</label>
-            <button class="destroy"></button>
-          </div>
-          <input class="edit" value="Buy a unicorn" />
-        </li>
-        <li class="editing">
-          <div class="view">
-            <input class="toggle" type="checkbox" />
-            <label>Make dishes</label>
-            <button class="destroy"></button>
-          </div>
-          <input class="edit" value="Make dishes" />
+          <input class="edit" [(ngModel)]="editingTask" />
         </li>
       </ul>
     </section>
     <!-- This footer should be hidden by default and shown when there are todos -->
     <footer class="footer">
       <!-- This should be `0 items left` by default -->
-      <span class="todo-count"><strong>0</strong> item left</span>
+      <span class="todo-count"><strong>0</strong> items left</span>
       <!-- Remove this if you don't implement routing -->
       <ul class="filters">
         <li>
