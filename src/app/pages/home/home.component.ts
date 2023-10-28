@@ -75,7 +75,7 @@ export class HomeComponent implements OnInit {
   }
 
   editTask(e: KeyboardEvent) {
-    if (e.code === 'Enter') {
+    if (e.code === 'Enter' && this.editingTask) {
       this.tasks = this.tasks.map((task) =>
         task.id === this.editingTaskId
           ? { ...task, title: this.editingTask }
