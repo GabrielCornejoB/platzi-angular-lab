@@ -15,6 +15,8 @@ export class HomeComponent implements OnInit {
   counter: number = 0;
   editingTask: string = '';
 
+  pendingTasksCounter: number = 0;
+
   submitObs$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
     filter((e) => e.code === 'Enter' || e.code === 'Escape')
   );
@@ -45,12 +47,19 @@ export class HomeComponent implements OnInit {
     });
     this.newTask = '';
     this.counter++;
+    this.pendingTasksCounter++;
   }
 
   toggleTaskStatus(taskId: string): void {
-    this.tasks = this.tasks.map((task) =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    );
+    this.tasks = this.tasks.map((task) => {
+      if (task.id === taskId) {
+        this.pendingTasksCounter = task.completed
+          ? this.pendingTasksCounter + 1
+          : this.pendingTasksCounter - 1;
+        return { ...task, completed: !task.completed };
+      }
+      return task;
+    });
   }
 
   openEditMode(taskId: string): void {
