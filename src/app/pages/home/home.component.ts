@@ -16,6 +16,7 @@ export class HomeComponent implements OnInit {
   editingTask: string = '';
 
   pendingTasksCounter: number = 0;
+  completedTasksCounter: number = 0;
 
   submitObs$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
     filter((e) => e.code === 'Enter' || e.code === 'Escape')
@@ -56,6 +57,8 @@ export class HomeComponent implements OnInit {
         this.pendingTasksCounter = task.completed
           ? this.pendingTasksCounter + 1
           : this.pendingTasksCounter - 1;
+        this.completedTasksCounter =
+          this.tasks.length - this.pendingTasksCounter;
         return { ...task, completed: !task.completed };
       }
       return task;
@@ -89,5 +92,9 @@ export class HomeComponent implements OnInit {
     this.tasks = this.tasks.map((task) => ({ ...task, isEditing: false }));
     this.isEditingActive = false;
     this.editingTaskId = null;
+  }
+
+  clearCompletedTasks(): void {
+    this.tasks = this.tasks.filter((task) => !task.completed);
   }
 }
