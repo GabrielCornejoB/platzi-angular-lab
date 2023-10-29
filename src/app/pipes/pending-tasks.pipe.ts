@@ -4,7 +4,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'pendingTasks',
 })
 export class PendingTasksPipe implements PipeTransform {
-  transform(value: number): string {
+  transform(value: number | null): string {
     if (value === 1) return 'item left';
     return 'items left';
   }

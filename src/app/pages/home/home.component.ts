@@ -1,100 +1,72 @@
-import { Component, OnInit } from '@angular/core';
-import { filter, fromEvent, tap } from 'rxjs';
-import { Task } from 'src/app/models/task.model';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription, filter, fromEvent, tap } from 'rxjs';
+import { TasksService } from 'src/app/services/tasks.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
 })
-export class HomeComponent implements OnInit {
-  tasks: Task[] = [];
+export class HomeComponent implements OnInit, OnDestroy {
   newTask: string = '';
-
   isEditingActive: boolean = false;
   editingTaskId: string | null = null;
-  counter: number = 0;
   editingTask: string = '';
-
-  pendingTasksCounter: number = 0;
-  completedTasksCounter: number = 0;
 
   submitObs$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
     filter((e) => e.code === 'Enter' || e.code === 'Escape')
   );
+  subscription?: Subscription;
 
-  constructor() {}
+  tasks$ = this.tasksService.tasks$;
+  pendingTasksCounter$ = this.tasksService.pendingTasksCounter$;
+  completedTasksCounter$ = this.tasksService.completedTasksCounter$;
+
+  constructor(
+    private aRoute: ActivatedRoute,
+    private tasksService: TasksService
+  ) {}
 
   ngOnInit(): void {
+    console.log('oninit');
     this.submitSubscription();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
   submitSubscription(): void {
     this.submitObs$.subscribe((e) => {
       if (this.isEditingActive) {
-        this.editTask(e);
+        if (e.code === 'Enter' && this.editingTaskId) {
+          this.tasksService.editTask(this.editingTaskId, this.editingTask);
+        }
+        this.closeEditMode();
       }
       if (e.code === 'Enter' && this.newTask.trim().length > 0) {
-        this.createTask();
+        this.tasksService.addTask(this.newTask);
+        this.newTask = '';
       }
     });
-  }
-
-  createTask() {
-    this.tasks.push({
-      id: this.counter.toString(),
-      title: this.newTask,
-      completed: false,
-      isEditing: false,
-    });
-    this.newTask = '';
-    this.counter++;
-    this.pendingTasksCounter++;
   }
 
   toggleTaskStatus(taskId: string): void {
-    this.tasks = this.tasks.map((task) => {
-      if (task.id === taskId) {
-        this.pendingTasksCounter = task.completed
-          ? this.pendingTasksCounter + 1
-          : this.pendingTasksCounter - 1;
-        this.completedTasksCounter =
-          this.tasks.length - this.pendingTasksCounter;
-        return { ...task, completed: !task.completed };
-      }
-      return task;
-    });
+    this.tasksService.toggleTaskStatus(taskId);
   }
 
   openEditMode(taskId: string): void {
-    this.tasks = this.tasks.map((task) => {
-      if (task.id === taskId) {
-        this.editingTask = task.title;
-        this.editingTaskId = task.id;
-        return { ...task, isEditing: true };
-      }
-      return { ...task, isEditing: false };
-    });
     this.isEditingActive = true;
-  }
-
-  editTask(e: KeyboardEvent) {
-    if (e.code === 'Enter' && this.editingTask) {
-      this.tasks = this.tasks.map((task) =>
-        task.id === this.editingTaskId
-          ? { ...task, title: this.editingTask }
-          : task
-      );
-    }
-    this.closeEditMode();
+    this.editingTaskId = taskId;
+    this.editingTask = this.tasksService.getTextFromTask(taskId);
   }
 
   closeEditMode(): void {
-    this.tasks = this.tasks.map((task) => ({ ...task, isEditing: false }));
     this.isEditingActive = false;
     this.editingTaskId = null;
   }
 
   clearCompletedTasks(): void {
-    this.tasks = this.tasks.filter((task) => !task.completed);
+    this.tasksService.clearCompletedTasks();
   }
 }

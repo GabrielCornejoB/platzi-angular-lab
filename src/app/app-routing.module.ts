@@ -6,13 +6,25 @@ import { HomeComponent } from './pages/home/home.component';
 const routes: Routes = [
   {
     path: '',
+    redirectTo: 'all',
+    pathMatch: 'full',
+  },
+  {
+    path: 'all',
     component: HomeComponent,
-    pathMatch: 'full'
-  }
+  },
+  {
+    path: 'pending',
+    component: HomeComponent,
+  },
+  {
+    path: 'completed',
+    component: HomeComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

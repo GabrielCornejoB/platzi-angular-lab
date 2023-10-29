@@ -7,7 +7,7 @@ import { Task } from '../models/task.model';
 export class PersistenceService {
   constructor() {}
 
-  getValues(): string | null {
+  getValues(): Task[] | null {
     const tasks = localStorage.getItem('mydayapp-angular');
     if (tasks) {
       return JSON.parse(tasks);
