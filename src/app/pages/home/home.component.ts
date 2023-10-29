@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, filter, fromEvent, tap } from 'rxjs';
 import { TasksService } from 'src/app/services/tasks.service';
 
@@ -18,17 +18,28 @@ export class HomeComponent implements OnInit, OnDestroy {
   );
   subscription?: Subscription;
 
+  filter: 'none' | 'completed' | 'pending' = 'none';
+
   tasks$ = this.tasksService.tasks$;
   pendingTasksCounter$ = this.tasksService.pendingTasksCounter$;
   completedTasksCounter$ = this.tasksService.completedTasksCounter$;
 
-  constructor(
-    private aRoute: ActivatedRoute,
-    private tasksService: TasksService
-  ) {}
+  constructor(private router: Router, private tasksService: TasksService) {
+    if (this.router.url === '/all') {
+      this.filter = 'none';
+      this.tasks$ = this.tasksService.tasks$;
+    }
+    if (this.router.url === '/completed') {
+      this.filter = 'completed';
+      this.tasks$ = this.tasksService.completedTasks$;
+    }
+    if (this.router.url === '/pending') {
+      this.filter = 'pending';
+      this.tasks$ = this.tasksService.pendingTasks$;
+    }
+  }
 
   ngOnInit(): void {
-    console.log('oninit');
     this.submitSubscription();
   }
 
